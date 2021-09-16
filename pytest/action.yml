@@ -16,9 +16,9 @@ inputs:
     required: false
     default: ''
   index:
-    description: 'The job index for parallel testing.'
+    description: 'The job index for parallel testing. 0 means all jobs/tests.'
     required: true
-    default: 1
+    default: 0
   total:
     description: 'Total number of jobs for parallel testing.'
     required: true
@@ -75,7 +75,7 @@ runs:
     - name: Run unit tests
       run: |
         source .tenv/bin/activate
-        tests/parallelize.py --index ${{ inputs.index }} --total ${{ inputs.total }} | xargs python -m pytest -v --junitxml=test-results/junit-${{ inputs.index }}.xml  --cov=synthesized --cov=keygen --cov-report=xml:coverage-reports/cobertura-${{ inputs.index }}.xml --cov-branch
+        ${{ github.action_path }}/parallelize.py --index ${{ inputs.index }} --total ${{ inputs.total }} | xargs python -m pytest -v --junitxml=test-results/junit-${{ inputs.index }}.xml  --cov=synthesized --cov=keygen --cov-report=xml:coverage-reports/cobertura-${{ inputs.index }}.xml --cov-branch
       env:
         SYNTHESIZED_KEY: ${{ secrets.SYNTHESIZED_KEY }}
 
