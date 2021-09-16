@@ -52,12 +52,14 @@ runs:
           ${{ runner.os }}-pip-${{ inputs.python-version }}
 
     - name: Create test-venv
+      shell: bash
       run: |
         python -m venv .tenv
         source .tenv/bin/activate
         pip install -U pip
 
     - name: Install Synthesized
+      shell: bash
       run: |
         source .tenv/bin/activate
         pip install ${{ inputs.src }} --cache-dir .pip-cache
@@ -72,26 +74,24 @@ runs:
         path: |
           packages.txt
           requirements-env.txt
+
     - name: Run unit tests
+      shell: bash
       run: |
         source .tenv/bin/activate
         ${{ github.action_path }}/parallelize.py --index ${{ inputs.index }} --total ${{ inputs.total }} | xargs python -m pytest -v --junitxml=test-results/junit-${{ inputs.index }}.xml  --cov=synthesized --cov=keygen --cov-report=xml:coverage-reports/cobertura-${{ inputs.index }}.xml --cov-branch
-      env:
-        SYNTHESIZED_KEY: ${{ secrets.SYNTHESIZED_KEY }}
 
     - name: Modify source in Coverage
-      if: ${{ always() }}
+      shell: bash
       run: sed -ie 's#/home/runner/work/synthesized/synthesized#/github/workspace#g' coverage-reports/cobertura-${{ inputs.index }}.xml
 
     - name: Upload test results
-      if: ${{ always() }}
       uses: actions/upload-artifact@v2
       with:
         name: test-results
         path: test-results/junit-${{ inputs.index }}.xml
 
     - name: Upload coverage
-      if: ${{ always() }}
       uses: actions/upload-artifact@v2
       with:
         name: coverage
