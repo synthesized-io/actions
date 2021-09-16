@@ -38,11 +38,6 @@ runs:
       with:
         python-version: ${{ inputs.python-version }}
 
-    - name: Download synthesized wheel
-      uses: actions/download-artifact@v2
-      with:
-        name: wheel
-
     - name: Cache pip packages
       uses: actions/cache@v2
       with:
