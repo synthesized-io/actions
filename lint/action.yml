@@ -1,0 +1,19 @@
+---
+name: 'lint'
+description: 'Lint a python package source code using precommit.'
+
+inputs:
+  python-version:
+    description: 'The version of python used.'
+    required: true
+    default: '3.8'
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/checkout@v2.3.4
+    - uses: actions/setup-python@v2.2.2
+      with:
+        python-version: ${{ inputs.python-version }}
+    - uses: pre-commit/action@v2.0.3
+...
