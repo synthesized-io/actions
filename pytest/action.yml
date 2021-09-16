@@ -1,0 +1,99 @@
+---
+name: 'pytest'
+description: 'Build and pytest a python package.'
+
+inputs:
+  python-version:
+    description: 'The version of python used.'
+    required: true
+    default: '3.8'
+  src:
+    description: 'The path to the source code.'
+    required: true
+    default: '.'
+  test-extras:
+    description: 'Any pip extras for test requirements.'
+    required: false
+    default: ''
+  index:
+    description: 'The job index for parallel testing.'
+    required: true
+    default: 1
+  total:
+    description: 'Total number of jobs for parallel testing.'
+    required: true
+    default: 1
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/checkout@v2.3.4
+        with:
+          ref: ${{ env.GITHUB_SHA }}
+          fetch-depth: 0
+
+    - name: Set up Python
+      id: setup-py
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ inputs.python-version }}
+
+    - name: Download synthesized wheel
+      uses: actions/download-artifact@v2
+      with:
+        name: wheel
+
+    - name: Cache pip packages
+      uses: actions/cache@v2
+      with:
+        path: .pip-cache
+        key: ${{ runner.os }}-pip-${{ inputs.python-version }}-${{ hashFiles('./setup.*') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-${{ inputs.python-version }}
+
+    - name: Create test-venv
+      run: |
+        python -m venv .tenv
+        source .tenv/bin/activate
+        pip install -U pip
+
+    - name: Install Synthesized
+      run: |
+        source .tenv/bin/activate
+        pip install ${{ inputs.src }} --cache-dir .pip-cache
+        pip list -vvv > packages.txt
+        pip freeze > requirements-env.txt
+        pip install "${{ inputs.src }}${{ inputs.test-extras }}" --cache-dir .pip-cache
+
+    - name: Upload environment dependencies
+      uses: actions/upload-artifact@v2
+      with:
+        name: requirements
+        path: |
+          packages.txt
+          requirements-env.txt
+    - name: Run unit tests
+      run: |
+        source .tenv/bin/activate
+        tests/parallelize.py --index ${{ inputs.index }} --total ${{ inputs.total }} | xargs python -m pytest -v --junitxml=test-results/junit-${{ inputs.index }}.xml  --cov=synthesized --cov=keygen --cov-report=xml:coverage-reports/cobertura-${{ inputs.index }}.xml --cov-branch
+      env:
+        SYNTHESIZED_KEY: ${{ secrets.SYNTHESIZED_KEY }}
+
+    - name: Modify source in Coverage
+      if: ${{ always() }}
+      run: sed -ie 's#/home/runner/work/synthesized/synthesized#/github/workspace#g' coverage-reports/cobertura-${{ inputs.index }}.xml
+
+    - name: Upload test results
+      if: ${{ always() }}
+      uses: actions/upload-artifact@v2
+      with:
+        name: test-results
+        path: test-results/junit-${{ inputs.index }}.xml
+
+    - name: Upload coverage
+      if: ${{ always() }}
+      uses: actions/upload-artifact@v2
+      with:
+        name: coverage
+        path: coverage-reports/cobertura-${{ inputs.index }}.xml
+...
