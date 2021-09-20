@@ -1,21 +1,28 @@
 ---
-name: 'lint'
-description: 'Lint a python package source code using precommit.'
+name: 'lint-pr'
+description: 'Lint and fix pull request HEAD branch code using precommit.'
 
 inputs:
   python-version:
     description: 'The version of python used.'
     required: true
     default: '3.8'
+  token:
+    description: 'Personal access token used to add precommit fixes to the PRs.'
+    required: true
 
 runs:
   using: "composite"
   steps:
     - uses: actions/checkout@v2.3.4
       with:
+        ref: ${{ github.head_ref }}
+        token: ${{ inputs.token }}
         fetch-depth: 0
     - uses: actions/setup-python@v2.2.2
       with:
         python-version: ${{ inputs.python-version }}
     - uses: pre-commit/action@v2.0.3
+      with:
+        token: ${{ inputs.token }}
 ...
