@@ -1,0 +1,44 @@
+---
+name: 'post-to-sonarcloud'
+description: 'Post results to Sonarcloud'
+
+inputs:
+  sonar-token:
+    description: 'Sonarcloud project access token.'
+    requires: true
+  test-results:
+    description: 'The name of the tests results artifact.'
+    default: 'test-results'
+  coverage-results:
+    description: 'The name of the coverage results artifact.'
+    default: 'coverage'
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/checkout@v2.3.4
+      with:
+        fetch-depth: 1
+
+    - name: Download test-results
+      uses: actions/download-artifact@v2
+      with:
+        name: ${{ inputs.test-results }}
+        path: test-results
+
+    - name: Download coverage
+      if: ${{ always() }}
+      uses: actions/download-artifact@v2
+      with:
+        name: ${{ inputs.coverage-results }}
+        path: coverage
+
+    - name: Analyze with SonarCloud
+      if: ${{ always() }}
+      uses: sonarsource/sonarcloud-github-action@master
+      with:
+        projectBaseDir: .
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+        SONAR_TOKEN: ${{ inputs.sonar-token }}
+...
