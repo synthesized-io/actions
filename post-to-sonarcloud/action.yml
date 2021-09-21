@@ -27,14 +27,12 @@ runs:
         path: test-results
 
     - name: Download coverage
-      if: ${{ always() }}
       uses: actions/download-artifact@v2
       with:
         name: ${{ inputs.coverage-results }}
         path: coverage
 
     - name: Analyze with SonarCloud
-      if: ${{ always() }}
       uses: sonarsource/sonarcloud-github-action@master
       with:
         projectBaseDir: .
