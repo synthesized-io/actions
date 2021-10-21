@@ -6,32 +6,10 @@ inputs:
   sonar-token:
     description: 'Sonarcloud project access token.'
     requires: true
-  test-results:
-    description: 'The name of the tests results artifact.'
-    default: 'test-results'
-  coverage-results:
-    description: 'The name of the coverage results artifact.'
-    default: 'coverage'
 
 runs:
   using: "composite"
   steps:
-    - uses: actions/checkout@v2.3.4
-      with:
-        fetch-depth: 1
-
-    - name: Download test-results
-      uses: actions/download-artifact@v2
-      with:
-        name: ${{ inputs.test-results }}
-        path: test-results
-
-    - name: Download coverage
-      uses: actions/download-artifact@v2
-      with:
-        name: ${{ inputs.coverage-results }}
-        path: coverage
-
     - name: Analyze with SonarCloud
       uses: sonarsource/sonarcloud-github-action@master
       with:
