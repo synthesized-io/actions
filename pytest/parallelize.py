@@ -27,5 +27,8 @@ if i == 0:
 else:
     section = [f for n, f in enumerate(files) if n % (N) == i - 1]
 
+if i == 1: 
+    section = section + [f for f in glob.glob('tests*/**/test_*.py', recursive=True) if 'metadata' in f]
+
 for f in section:
     print(f)
