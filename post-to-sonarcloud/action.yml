@@ -6,6 +6,9 @@ inputs:
   sonar-token:
     description: 'Sonarcloud project access token.'
     requires: true
+  version:
+    description: 'The package version.'
+    requires: true
 
 runs:
   using: "composite"
@@ -14,6 +17,8 @@ runs:
       uses: sonarsource/sonarcloud-github-action@master
       with:
         projectBaseDir: .
+        args: >
+          -Dsonar.projectVersion=${{ inputs.version }}
       env:
         GITHUB_TOKEN: ${{ github.token }}
         SONAR_TOKEN: ${{ inputs.sonar-token }}
