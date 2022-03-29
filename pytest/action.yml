@@ -73,16 +73,19 @@ runs:
         ${{ github.action_path }}/parallelize.py --index ${{ inputs.index }} --total ${{ inputs.total }} | xargs python -m pytest -v --junitxml=test-results/junit-${{ inputs.index }}.xml  --cov=synthesized --cov=keygen --cov-report=xml:coverage-reports/cobertura-${{ inputs.index }}.xml --cov-branch
 
     - name: Modify source in Coverage
+      if: ${{ always() }}
       shell: bash
       run: sed -ie 's#${{ github.workspace }}#/github/workspace#g' coverage-reports/cobertura-${{ inputs.index }}.xml
 
     - name: Upload test results
+      if: ${{ always() }}
       uses: actions/upload-artifact@v2
       with:
         name: test-results
         path: test-results/junit-${{ inputs.index }}.xml
 
     - name: Upload coverage
+      if: ${{ always() }}
       uses: actions/upload-artifact@v2
       with:
         name: coverage
