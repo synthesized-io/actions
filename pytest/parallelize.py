@@ -22,14 +22,20 @@ seed = args.seed if args.seed is not None else os.environ.get('GITHUB_SHA', 'jus
 file_map = {
     "tests/common/test_annotations.py": 2,
     "tests/test_basic.py": 3,
-    "tests/insight/test_latent.py": 4,
-    "tests/test_basic_synthetic.py": 5,
-    "tests/test_export_model.py": 6,
-    "tests/fairness/test_bias_mitigator.py": 7,
-    "tests/complex/test_multi_table.py": 8,
+    "tests/test_basic_synthetic.py": 4,
+    "tests/test_export_model.py": 5,
+    "tests/fairness/test_bias_mitigator.py": 6,
+    "tests/complex/test_multi_table.py": 7,
     "tests/test_dp_synthetic.py": 8,
-    "tests/common/test_data_imputer.py": 7,
-    "tests/testing/plotting/test_plotting.py": 6,
+    "tests/common/test_data_imputer.py": 8,
+    "tests/testing/plotting/test_plotting.py": 7,
+    "tests/test_basic_synthetic2.py": 6,
+    "tests/testing/test_assessor.py": 5,
+    "tests/fairness/test_fairness_scorer.py": 8,
+    "tests/privacy/test_sanitizer.py": 7,
+    "tests/privacy/test_linkage_attack.py": 6,
+    "tests/complex/test_conditional_sampler.py": 8,
+    "tests/insight/test_latent.py": 7,
 }
 imap = dict()
 
