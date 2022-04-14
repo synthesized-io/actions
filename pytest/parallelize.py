@@ -18,14 +18,35 @@ args = parser.parse_args()
 i = args.index
 N = args.total
 seed = args.seed if args.seed is not None else os.environ.get('GITHUB_SHA', 'just a random seed')
-files = [f for f in glob.glob('tests*/**/test_*.py', recursive=True) if 'metadata' not in f]
+
+file_map = {
+    "tests/common/test_annotations.py": 2,
+    "tests/test_basic.py": 3,
+    "tests/insight/test_latent.py": 4,
+    "tests/test_basic_synthetic.py": 5,
+    "tests/test_export_model.py": 6,
+    "tests/fairness/test_bias_mitigator.py": 7,
+    "tests/complex/test_multi_table.py": 8,
+    "tests/test_dp_synthetic.py": 8,
+    "tests/common/test_data_imputer.py": 7,
+    "tests/testing/plotting/test_plotting.py": 6,
+}
+imap = dict()
+
+for fkey, item in file_map.items():
+    if item not in imap:
+        imap[item] = [fkey]
+    else:
+        imap[item].append(fkey)
+
+files = [f for f in glob.glob('tests*/**/test_*.py', recursive=True) if 'metadata' not in f and f not in file_map]
 random.seed(seed)
 random.shuffle(files)
 
 if i == 0:
-    section = files
+    section = files + [f for f in file_map.keys()]
 else:
-    section = [f for n, f in enumerate(files) if n % (N) == i - 1]
+    section = [f for n, f in enumerate(files) if n % (N) == i - 1] + imap.get(i, [])
 
 if i == 1: 
     section = section + [f for f in glob.glob('tests*/**/test_*.py', recursive=True) if 'metadata' in f]
