@@ -5,19 +5,41 @@ import glob
 import os
 import random
 
-parser = argparse.ArgumentParser(description='Randomly Split files into unique sections. Uses the Git SHA as a seed')
-parser.add_argument('--index', metavar='i', type=int, required=True,
-                    help='The current processes unqiue index. 0 <= i <= N. When set to 0 returns all files.')
-parser.add_argument('--total', metavar='N', type=int, required=True,
-                    help='The total number of sections that are being split.')
-parser.add_argument('--seed', metavar='seed', type=str, required=False, default=None,
-                    help='A random seed used to initialise the splitting. Defaults to GITHUB_SHA.')
+parser = argparse.ArgumentParser(
+    description="Randomly Split files into unique sections. Uses the Git SHA as a seed"
+)
+parser.add_argument(
+    "--index",
+    metavar="i",
+    type=int,
+    required=True,
+    help="The current processes unqiue index. 0 <= i <= N. When set to 0 returns all files.",
+)
+parser.add_argument(
+    "--total",
+    metavar="N",
+    type=int,
+    required=True,
+    help="The total number of sections that are being split.",
+)
+parser.add_argument(
+    "--seed",
+    metavar="seed",
+    type=str,
+    required=False,
+    default=None,
+    help="A random seed used to initialise the splitting. Defaults to GITHUB_SHA.",
+)
 
 args = parser.parse_args()
 
 i = args.index
 N = args.total
-seed = args.seed if args.seed is not None else os.environ.get('GITHUB_SHA', 'just a random seed')
+seed = (
+    args.seed
+    if args.seed is not None
+    else os.environ.get("GITHUB_SHA", "just a random seed")
+)
 
 file_map = {
     "tests/common/test_annotations.py": 2,
@@ -38,6 +60,8 @@ file_map = {
     "tests/insight/test_latent.py": 7,
 }
 imap = dict()
+all_files = [f for f in glob.glob("tests*/**/test_*.py", recursive=True)]
+file_map = {fkey: item for fkey, item in file_map.items() if fkey in all_files}
 
 for fkey, item in file_map.items():
     if item not in imap:
@@ -45,7 +69,11 @@ for fkey, item in file_map.items():
     else:
         imap[item].append(fkey)
 
-files = [f for f in glob.glob('tests*/**/test_*.py', recursive=True) if 'metadata' not in f and f not in file_map]
+files = [
+    f
+    for f in glob.glob("tests*/**/test_*.py", recursive=True)
+    if "metadata" not in f and f not in file_map
+]
 random.seed(seed)
 random.shuffle(files)
 
@@ -54,8 +82,10 @@ if i == 0:
 else:
     section = [f for n, f in enumerate(files) if n % (N) == i - 1] + imap.get(i, [])
 
-if i == 1: 
-    section = section + [f for f in glob.glob('tests*/**/test_*.py', recursive=True) if 'metadata' in f]
+if i == 1:
+    section = section + [
+        f for f in glob.glob("tests*/**/test_*.py", recursive=True) if "metadata" in f
+    ]
 
 for f in section:
     print(f)
