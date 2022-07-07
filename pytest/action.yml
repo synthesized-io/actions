@@ -18,11 +18,11 @@ inputs:
   index:
     description: 'The job index for parallel testing. 0 means all jobs/tests.'
     required: true
-    default: 0
+    default: '0'
   total:
     description: 'Total number of jobs for parallel testing.'
     required: true
-    default: 1
+    default: '1'
 
 runs:
   using: "composite"
@@ -53,10 +53,10 @@ runs:
       shell: bash
       run: |
         source .tenv/bin/activate
-        pip install ${{ inputs.src }} --cache-dir .pip-cache
+        pip install -q ${{ inputs.src }} --cache-dir .pip-cache
         pip list -vvv > packages.txt
         pip freeze > requirements-env.txt
-        pip install "${{ inputs.src }}${{ inputs.test-extras }}" --cache-dir .pip-cache
+        pip install -q "${{ inputs.src }}${{ inputs.test-extras }}" --cache-dir .pip-cache
 
     - name: Upload environment dependencies
       uses: actions/upload-artifact@v2
